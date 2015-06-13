@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<!--
+    Copyright (c) 2012-2014 Adobe Systems Incorporated. All rights reserved.
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+     KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<html  ng-app="app">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="msapplication-tap-highlight" content="no" />
+        <!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+         <link rel="stylesheet" href="css/onsenui.css">
+        <link rel="stylesheet" href="css/onsen-css-components.css">
+        <link rel="stylesheet" href="css/controller-crear.css">
+        <link rel="stylesheet" href="css/controller-login.css">
+        <link rel="stylesheet" href="css/controller-setting.css">
+        <link rel="stylesheet" href="css/controller-init.css">
+
+
+        <title>Bloqueo Oaxaca</title>
+    </head>
+    <body ng-controller="Init">
+       <ons-navigator var="myNavigator">
+         <ons-sliding-menu
+        menu-page="menu.html" main-page="page1.html" side="left"
+        var="menu" type="reveal" max-slide-distance="260px" swipeable="false">
+        </ons-sliding-menu>
+      </ons-navigator>
+
+
+      <ons-template id="menu.html">
+        <ons-page modifier="menu-page">
+            <ons-toolbar modifier="transparent"></ons-toolbar>
+
+            <ons-list class="menu-list">
+                <ons-list-item class="menu-item" ng-click="menu.setMainPage('page1.html', {closeMenu: true})">
+                  <ons-icon icon="fa-home"></ons-icon>
+                    Principal
+                </ons-list-item>
+
+                <ons-list-item class="menu-item" ng-click="menu.setMainPage('crear.html', {closeMenu: true})">
+                  <ons-icon icon="fa-plus"></ons-icon>
+                  Publicar Bloqueo
+                </ons-list-item>
+
+
+
+
+            </ons-list>
+
+          <br>
+
+          <ons-list class="bottom-menu-list">
+            <ons-list-item class="bottom-menu-item" ng-click="menu.setMainPage('config.html', {closeMenu: true})">
+                <ons-icon icon="fa-cog" size="20px"></ons-icon>
+              Configuración
+
+            </ons-list-item>
+
+            <ons-list-item class="bottom-menu-item" ng-click="menu.setMainPage('page1.html', {closeMenu: true})">
+              Ayuda
+            </ons-list-item>
+
+            <ons-list-item class="bottom-menu-item" ng-click="menu.setMainPage('page2.html', {closeMenu: true})">
+              Enviar recomendaciones
+            </ons-list-item>
+          </ons-list>
+        </ons-page>
+      </ons-template>
+
+      <ons-template  id="page1.html">
+
+        <ons-page ng-controller="IndexCtrl" >
+
+          <ons-toolbar>
+            <div class="left">
+                <ons-toolbar-button ng-click="menu.toggle()">
+                    <ons-icon icon="ion-navicon" size="28px" fixed-width="false"></ons-icon>
+                </ons-toolbar-button>
+            </div>
+            <div class="center">Bloqueo Oaxaca</div>
+            <div class="right"></div>
+          </ons-toolbar>
+
+           <div id="mapa_principal">
+
+            </div>
+
+            <div id="bloqueo">
+                <ons-row style="padding: 10px;">
+                    <ons-col align="center">
+                      <ons-button id='' modifier="light" style="width:90%;overflow-x:scroll">
+
+                       <p>{{bloqueo}}</p>
+                      </ons-button>
+
+                    </ons-col>
+                </ons-row>
+
+
+            </div>
+
+
+        </ons-page>
+      </ons-template>
+
+      <ons-template  id="crear.html">
+        <ons-page ng-controller="CrearCtrl">
+          <ons-toolbar>
+            <div class="left">
+              <ons-toolbar-button ng-click="menu.toggle()">
+                <ons-icon icon="ion-navicon" size="28px" fixed-width="false"></ons-icon>
+              </ons-toolbar-button>
+            </div>
+            <div class="center">Crear publicación</div>
+          </ons-toolbar>
+
+          <ons-list>
+            <ons-list-item>
+              <textarea  class="textarea textarea--transparent" style="margin-top:8px; width: 100%;font-size:1em" modifier="large--light" ng-model="bloqueo.estado" class="textarea"  placeholder="Noticia aquí" id="my-textarea"></textarea>
+              <span style="color: #999; font-size: 13px;" for="">{{100 - bloqueo.estado.length}}</span>
+            </ons-list-item>
+
+            <ons-list-item>
+              <select style="margin-top:8px;width:100%;font-size:1em" lass="text-input" ng-model="bloqueo.tipo" ng-options="t.id as t.get('nombre') for t in tipos" >
+                <option value="" ng-if="foo">Selecciona uno.</option>
+              </select>
+            </ons-list-item>
+
+            <ons-list-item>
+                <div id="mapa_crear">
+
+                </div>
+            </ons-list-item>
+
+
+
+               <ons-list-item ng-repeat="n in niveles">
+                  {{n.get('nombre')}}
+                <label class="switch switch--list-item">
+                  <input type="radio" name="prioridad" ng-model="bloqueo.nivel" ng-value="n.id" class="switch__input">
+                  <div class="switch__toggle"></div>
+                </label>
+              </ons-list-item>
+
+
+
+            <ons-list-item>
+              <ons-button   style="margin-top:8px; width: 100%;font-size:1em" ng-click="publicar(bloqueo)"  disabled='{{100 -bloqueo.estado.length < 0}}' modifier="large">Publicar</ons-button>
+            </ons-list-item>
+
+          </ons-list>
+
+        </ons-page>
+      </ons-template>
+
+      <ons-template   id="config.html">
+            <ons-page ng-controller="ConfigSetting">
+              <ons-toolbar>
+                <div class="left">
+                  <ons-toolbar-button ng-click="menu.toggle()">
+                    <ons-icon icon="ion-navicon" size="28px" fixed-width="false"></ons-icon>
+                  </ons-toolbar-button>
+                </div>
+                <div class="center">Configuración</div>
+              </ons-toolbar>
+
+                <ons-row class="profile-wrapper">
+                    <ons-col width="60px" class="profile-image-wrapper">
+                      <img src="images/profile-image-05.png" class="profile-image">
+                    </ons-col>
+
+                    <ons-col>
+                      <div class="profile-name">{{usuario.username}}</div>
+                      <div class="profile-email">{{usuario.email}}</div>
+                    </ons-col>
+
+                  </ons-row>
+
+                  <div class="settings-header">Share</div>
+
+                  <ons-list modifier="inset" class="settings-list">
+                    <ons-list-item >
+                      Twitter
+                      <ons-switch ng-click="activarTwitter()" var="twitter_switch" modifier="list-item"></ons-switch>
+                    </ons-list-item>
+
+                    <ons-list-item>
+                      Facebook
+                      <ons-switch modifier="list-item" checked></ons-switch>
+                    </ons-list-item>
+                  </ons-list>
+
+                  <div class="settings-header">Others</div>
+
+                  <ons-list modifier="inset" class="settings-list">
+                    <ons-list-item modifier="chevron">
+                      Terms of Use
+                    </ons-list-item>
+
+                    <ons-list-item modifier="chevron">
+                      Privacy Policy
+                    </ons-list-item>
+                  </ons-list>
+
+                  <br>
+
+                  <ons-list modifier="inset" class="settings-list">
+                    <ons-list-item modifier="tappable" ng-click="cuenta()">
+                      <ons-icon icon="ion-log-out"  style="opacity: 0.8"></ons-icon>
+                      {{sesion}}
+                    </ons-list-item>
+                  </ons-list>
+
+
+                </ons-page>
+        </ons-template>
+
+
+      <ons-template id="login.html">
+          <ons-dialog   ng-controller="LoginCtrl" var="dialog" cancelable>
+
+              <ons-toolbar inline>
+                <div class="center">
+                  Inicio de Sesión
+                </div>
+              </ons-toolbar>
+
+              <p>
+                <input placeholder="Usuario" ng-model="usuario.usuario" class="text-input input-login">
+              </p>
+
+              <p>
+                <input type="password" placeholder="Contraseña" ng-model="usuario.contrasena"  class="text-input input-login">
+              </p>
+
+              <p>
+                <ons-button modifier="large" ng-click="login(usuario)">Acceder</ons-button>
+              </p>
+              <p>
+                <ons-button modifier="cta" class="button button--large--cta" ng-click="registro()">Registro</ons-button>
+              </p>
+
+          </ons-dialog>
+        </ons-template>
+
+        <ons-template id="register.html">
+          <ons-dialog ng-controller="RegisterCtrl"  var="dialog2" cancelable>
+
+              <ons-toolbar inline>
+                <div class="center">
+                  Registro
+                </div>
+              </ons-toolbar>
+                <form name="form" >
+                  <p>
+                    <input placeholder="Usuario" required name="usuario" ng-model="usuario.usuario"  class="text-input input-login">
+                  </p>
+
+                  <p>
+                    <input type="email" name="correo"  required ng-model="usuario.correo" placeholder="correo@dominio.com"  class="text-input input-login">
+                  </p>
+
+                  <p>
+                    <input type="password" name="contrasena" required ng-model="usuario.contrasena" placeholder="Contraseña"  class="text-input input-login">
+                  </p>
+
+                  <p>
+                    <ons-button modifier="large" type="submit" ng-disabled="form.correo.$error.email" ng-click="register(usuario)">Crear</ons-button>
+                  </p>
+                  </form>
+
+          </ons-dialog>
+        </ons-template>
+    </body>
+
+        <script src="js/angular/angular.js"></script>
+        <script src="js/jquery.js"></script>
+        <script src="js/onsenui.js"></script>
+        <script src="cordova.js"></script>
+        <script src="http://maps.google.com/maps/api/js?sensor=true"></script>
+        <script src="js/parse.js"></script>
+        <script src="js/bloqueo.js"></script>
+        <script src="js/factory/factoryParse.js"></script>
+        <script src="js/factory/factoryTipo.js"></script>
+        <script src="js/factory/factoryNivel.js"></script>
+        <script src="js/factory/factoryTwitter.js"></script>
+        <script src="js/factory/factoryBloqueo.js"></script>
+        <script src="js/controller/controllerCrear.js"></script>
+        <script src="js/controller/controllerLogin.js"></script>
+        <script src="js/controller/controllerRegister.js"></script>
+        <script src="js/controller/controllerSetting.js"></script>
+        <script src="js/controller/controllerIndex.js"></script>
+        <script src="js/controller/controllerTwitter.js"></script>
+
+
+
+
+</html>
