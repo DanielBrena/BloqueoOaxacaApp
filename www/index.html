@@ -27,11 +27,16 @@
         <!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
         <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
          <link rel="stylesheet" href="css/onsenui.css">
-        <link rel="stylesheet" href="css/onsen-css-components.css">
+        <link rel="stylesheet" href="css/onsen-css-components_azul.css">
         <link rel="stylesheet" href="css/controller-crear.css">
         <link rel="stylesheet" href="css/controller-login.css">
         <link rel="stylesheet" href="css/controller-setting.css">
         <link rel="stylesheet" href="css/controller-init.css">
+        <link rel="stylesheet" href="css/controller-chat.css">
+        <style>
+
+           
+        </style>
 
 
         <title>Bloqueo Oaxaca</title>
@@ -68,18 +73,30 @@
           <br>
 
           <ons-list class="bottom-menu-list">
+
+             <ons-list-item class="bottom-menu-item" ng-click="menu.setMainPage('offline.html', {closeMenu: true})">
+                <ons-icon icon="ion-code-download" size="20px"></ons-icon>
+              Bloqueos descargados
+            </ons-list-item>
+
+
+            <ons-list-item class="bottom-menu-item" ng-click="menu.setMainPage('chat.html', {closeMenu: true})">
+                <ons-icon icon="ion-chatboxes" size="20px"></ons-icon>
+              Pregunta a los miembros
+            </ons-list-item>
+
+
             <ons-list-item class="bottom-menu-item" ng-click="menu.setMainPage('config.html', {closeMenu: true})">
                 <ons-icon icon="fa-cog" size="20px"></ons-icon>
               Configuración
 
             </ons-list-item>
 
-            <ons-list-item class="bottom-menu-item" ng-click="menu.setMainPage('page1.html', {closeMenu: true})">
-              Ayuda
-            </ons-list-item>
-
-            <ons-list-item class="bottom-menu-item" ng-click="menu.setMainPage('page2.html', {closeMenu: true})">
-              Enviar recomendaciones
+            
+            <ons-list-item class="bottom-menu-item" ng-click="menu.setMainPage('instrucciones.html', {closeMenu: true})">
+                <ons-icon icon="ion-help-circled" size="20px"></ons-icon>
+            
+                Instrucciones
             </ons-list-item>
           </ons-list>
         </ons-page>
@@ -96,7 +113,11 @@
                 </ons-toolbar-button>
             </div>
             <div class="center">Bloqueo Oaxaca</div>
-            <div class="right"></div>
+            <div class="right">
+              <ons-toolbar-button ng-click="busqueda()">
+                    <ons-icon icon="ion-search" size="28px" fixed-width="false"></ons-icon>
+                </ons-toolbar-button>
+            </div>
           </ons-toolbar>
 
            <div id="mapa_principal">
@@ -106,7 +127,7 @@
             <div id="bloqueo">
                 <ons-row style="padding: 10px;">
                     <ons-col align="center">
-                      <ons-button id='' modifier="light" style="width:90%;overflow-x:scroll">
+                      <ons-button id='' modifier="outline" style="width:90%;overflow-x:scroll">
 
                        <p>{{bloqueo}}</p>
                       </ons-button>
@@ -139,7 +160,7 @@
             </ons-list-item>
 
             <ons-list-item>
-              <select style="margin-top:8px;width:100%;font-size:1em" lass="text-input" ng-model="bloqueo.tipo" ng-options="t.id as t.get('nombre') for t in tipos" >
+              <select  style="margin-top:8px;width:100%;font-size:1em;" lass="text-input" ng-model="bloqueo.tipo" ng-options="t as t.get('nombre') for t in tipos" ng-change="cambiarEstado(bloqueo.tipo.get('mensaje'))" >
                 <option value="" ng-if="foo">Selecciona uno.</option>
               </select>
             </ons-list-item>
@@ -171,6 +192,42 @@
         </ons-page>
       </ons-template>
 
+      <ons-template id="offline.html">
+          <ons-page ng-controller="DescargaCtrl">
+          <ons-toolbar>
+            <div class="left">
+              <ons-toolbar-button ng-click="menu.toggle()">
+                <ons-icon icon="ion-navicon" size="28px" fixed-width="false"></ons-icon>
+              </ons-toolbar-button>
+            </div>
+            <div class="center">Bloqueos descargados</div>
+          </ons-toolbar>
+
+          
+            <ons-list>
+                <ons-list-header>Bloqueos guardados</ons-list-header>
+
+                <ons-list-item modifier="chevron" ng-click="enviarAMapa(b)" ng-repeat="b in bloqueos">
+                  
+                  <div class="plan-name"> {{b.nombre}}</div>
+
+                    <div class="plan-info">
+                      <div>
+                        {{b.fecha}}
+                      </div>
+
+
+                      
+                    </div>
+                </ons-list-item>
+                
+
+            </ons-list>
+
+          
+          </ons-page>
+        </ons-template>
+
       <ons-template   id="config.html">
             <ons-page ng-controller="ConfigSetting">
               <ons-toolbar>
@@ -183,8 +240,8 @@
               </ons-toolbar>
 
                 <ons-row class="profile-wrapper">
-                    <ons-col width="60px" class="profile-image-wrapper">
-                      <img src="images/profile-image-05.png" class="profile-image">
+                    <ons-col ng-show="showUser"  width="60px" class="profile-image-wrapper">
+                      <ons-icon  size="60px" icon="ion-person"></ons-icon>
                     </ons-col>
 
                     <ons-col>
@@ -202,25 +259,23 @@
                       <ons-switch ng-click="activarTwitter()" var="twitter_switch" modifier="list-item"></ons-switch>
                     </ons-list-item>
 
-                    <ons-list-item>
+                    <ons-list-item ng-controller="FacebookCtrl">
                       Facebook
-                      <ons-switch modifier="list-item" checked></ons-switch>
+                      <ons-switch ng-click="activarFacebook()" var="facebook_switch"  modifier="list-item" ></ons-switch>
                     </ons-list-item>
                   </ons-list>
 
-                  <div class="settings-header">Others</div>
-
-                  <ons-list modifier="inset" class="settings-list">
-                    <ons-list-item modifier="chevron">
-                      Terms of Use
-                    </ons-list-item>
-
-                    <ons-list-item modifier="chevron">
-                      Privacy Policy
-                    </ons-list-item>
-                  </ons-list>
+                 
 
                   <br>
+
+                  <ons-list modifier="inset" ng-controller="DescargaCtrl" class="settings-list">
+                    <ons-list-item modifier="tappable" ng-click="descargar()">
+                      <ons-icon icon="ion-code-download"  ></ons-icon>
+                      Descarga los bloqueos
+                    </ons-list-item>
+                  </ons-list>
+
 
                   <ons-list modifier="inset" class="settings-list">
                     <ons-list-item modifier="tappable" ng-click="cuenta()">
@@ -289,6 +344,113 @@
 
           </ons-dialog>
         </ons-template>
+
+        <ons-template id="chat.html">
+          <ons-page ng-controller="ChatCtrl">
+          <ons-toolbar>
+            <div class="left">
+              <ons-toolbar-button ng-click="menu.toggle()">
+                <ons-icon icon="ion-navicon" size="28px" fixed-width="false"></ons-icon>
+              </ons-toolbar-button>
+            </div>
+            <div class="center">Chat</div>
+          </ons-toolbar>
+
+          
+            <ons-list class="plan-list">
+              <ons-list-item class="plan" ng-repeat="message in messages track by $index">
+                <ons-row>
+                  <ons-col width="80px" class="plan-left">
+                    <div class="plan-date">{{message.hora}}</div>
+                    
+                  </ons-col>
+
+                  <ons-col width="6px" class="plan-center" ng-style="{backgroundColor:index % 3 == 1 ? '#3399ff' : '#ccc'}">
+                  </ons-col>
+
+                  <ons-col class="plan-right">
+                    <div class="plan-name"> {{message.msj}}</div>
+
+                    <div class="plan-info">
+                      <div>
+                        <ons-icon icon="ion-person"></ons-icon> {{message.usuario}}
+                      </div>
+
+                      
+                    </div>
+                  </ons-col>
+                </ons-row>
+              </ons-list-item>
+
+            </ons-list>
+          
+          <div id="contenedor_envio">
+              <ons-list>
+
+                    <ons-list-item>
+                      <textarea  class="textarea textarea--transparent" style="margin-top:8px; width: 100%;font-size:1em" modifier="large--light"  ng-keyup="validarMensaje(newMessage)" ng-model='newMessage' class="textarea"  placeholder="Mensaje" id="my-textarea"></textarea>
+                      <span style="color: #999; font-size: 13px;" for="">{{100 - newMessage.length}}</span>
+                    </ons-list-item>
+
+                    <ons-list-item>
+                        <ons-button   style="margin-top:8px;margin-bottom:8px; width: 100%;font-size:1em" ng-click="enviar(mensaje)"  disabled='{{validar_boton}}' modifier="large">Enviar</ons-button>
+                    </ons-list-item>
+
+                </ons-list>
+          </div>
+
+          
+          </ons-page>
+        </ons-template>
+
+        <ons-template id="instrucciones.html">
+          <ons-page >
+          <ons-toolbar>
+            <div class="left">
+              <ons-toolbar-button ng-click="menu.toggle()">
+                <ons-icon icon="ion-navicon" size="28px" fixed-width="false"></ons-icon>
+              </ons-toolbar-button>
+            </div>
+            <div class="center">Instrucciones</div>
+          </ons-toolbar>
+
+          
+            <ons-list>
+                <ons-list-header>Mapa principal</ons-list-header>
+
+                <ons-list-item >Encuentras todos los bloqueos en el estado, basandose en tu ubicación.</ons-list-item>
+                <ons-list-item >Presiona el marcador del Bloqueo y se mostrara una descripcion del mismo en la parte inferior.</ons-list-item  
+                <ons-list-item >Busca la ubicación donde creas que pueda tener un bloqueo.</ons-list-item>              
+
+                <ons-list-header>Publicaciones</ons-list-header>
+                    
+                <ons-list-item >Puedes crear tus publicaciones de Bloqueos.</ons-list-item>
+                <ons-list-item >Para publicar necesitas crear una cuenta.</ons-list-item>
+                <ons-list-item >Hay diferentes tipos de Bloqueos, tu escoges dependiendo la situación.</ons-list-item>
+                <ons-list-item >Exiten las prioridades, según tu criterio puedes escoreger: Alta, Media o Baja.</ons-list-item>
+                <ons-list-item >Puedes compartir en las redes sociales, ir a la sección de configuración</ons-list-item>
+
+                <ons-list-header>Preguntas a los miembros</ons-list-header>
+
+                <ons-list-item >Es un chat donde puedes preguntar tus dudas y otros usuarios pueden ayudarte.</ons-list-item>
+                <ons-list-item >Necesitas crear una cuenta para poder preguntar.</ons-list-item>
+                <ons-list-item >El chat solo soporta 20 usuarios en linea, si ya te respondieron salir del mismo.</ons-list-item>
+
+                <ons-list-header>Bloqueos descargados</ons-list-header>
+                 <ons-list-item >Lista de todos los bloqueos que has descargado.</ons-list-item>
+
+                <ons-list-header>Configuracion</ons-list-header>
+                <ons-list-item >Puedes activar las redes sociales para compartir tus bloqueos.</ons-list-item>
+                <ons-list-item >Descarga los bloqueos del dia y asi verlos sin conexion a internet.</ons-list-item>
+
+            </ons-list>
+
+          
+          </ons-page>
+        </ons-template>
+
+        
+
     </body>
 
         <script src="js/angular/angular.js"></script>
@@ -296,6 +458,9 @@
         <script src="js/onsenui.js"></script>
         <script src="js/jsOAuth.js"></script>
         <script src="cordova.js"></script>
+        <script src="https://cdn.pubnub.com/pubnub-dev.js"></script>
+        <script src="http://pubnub.github.io/pubnub-angular/lib/pubnub-angular.js"></script>
+        <script src="https://cdn.pubnub.com/pubnub-crypto.min.js"></script>
         <script src="http://maps.google.com/maps/api/js?sensor=true"></script>
         <script src="js/parse.js"></script>
         <script src="js/bloqueo.js"></script>
@@ -304,12 +469,18 @@
         <script src="js/factory/factoryNivel.js"></script>
         <script src="js/factory/factoryTwitter.js"></script>
         <script src="js/factory/factoryBloqueo.js"></script>
+        <script src="js/factory/factoryDataSource.js"></script>
+        <script src="js/factory/factoryBloqueoBD.js"></script>
+        
         <script src="js/controller/controllerCrear.js"></script>
         <script src="js/controller/controllerLogin.js"></script>
         <script src="js/controller/controllerRegister.js"></script>
         <script src="js/controller/controllerSetting.js"></script>
         <script src="js/controller/controllerIndex.js"></script>
         <script src="js/controller/controllerTwitter.js"></script>
+        <script src="js/controller/controllerFacebook.js"></script>
+        <script src="js/controller/controllerChat.js"></script>
+        <script src="js/controller/controllerDescarga.js"></script>
 
 
 
